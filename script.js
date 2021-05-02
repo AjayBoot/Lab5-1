@@ -11,7 +11,23 @@ const reset = document.querySelector("[type='reset']"); // reference to Clear bu
 const readText = document.querySelector("[type='button']"); // reference to Read Text button]
 const topText = document.querySelector("[name='textTop']"); // reference to text field for top text
 const bottomText = document.querySelector("[name='textBottom']"); //reference to text field for bottom text
+const voiceSelect = document.querySelector("[id='voice-selection']");
+var synth = window.speechSynthesis; // initialization of speech synthesizer
+var voices = synth.getVoices(); // gets list of avaliable voices
 
+for(var i = 0; i < voices.length ; i++) {
+
+  var option = document.createElement('option');
+  option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+
+  if(voices[i].default) {
+    option.textContent += ' -- DEFAULT';
+  }
+
+  option.setAttribute('data-lang', voices[i].lang);
+  option.setAttribute('data-name', voices[i].name);
+  voiceSelect.appendChild(option);
+}
 
 // Fires whenever the img object loads a new image (such as with img.src =)
 img.addEventListener('load', () => {
@@ -73,6 +89,17 @@ reset.addEventListener('click', () => {
     submit.disabled = false;
     reset.disabled = true;
     readText.disabled = true;
+});
+
+//Occurs when user clicks Read Text button
+readText.addEventListener('click', () => {
+
+  let topSpeech = new SpeechSynthesisUtterance(topText.value);
+  let bottomSpeech = new SpeechSynthesisUtterance(bottomText.value);
+
+  speechSynthesis.speak(topSpeech);
+  speechSynthesis.speak(bottomSpeech);
+
 });
 
 /**
