@@ -11,23 +11,31 @@ const reset = document.querySelector("[type='reset']"); // reference to Clear bu
 const readText = document.querySelector("[type='button']"); // reference to Read Text button]
 const topText = document.querySelector("[name='textTop']"); // reference to text field for top text
 const bottomText = document.querySelector("[name='textBottom']"); //reference to text field for bottom text
-const voiceSelect = document.querySelector("[id='voice-selection']");
+const voiceSelect = document.querySelector("[id='voice-selection']"); 
 var synth = window.speechSynthesis; // initialization of speech synthesizer
-var voices = synth.getVoices(); // gets list of avaliable voices
+var voices = synth.getVoices();
+var toSpeak;
+const slider = document.querySelector("[type='range']"); // reference to volume slider
+const icon = document.querySelector("div img") // reference to volume icon
 
-for(var i = 0; i < voices.length ; i++) {
+//Gets list of voices and updates selection list
+function populateVoiceList() {
 
-  var option = document.createElement('option');
-  option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+  for(var i = 0; i < voices.length ; i++) {
+    var option = document.createElement('option');
+    option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
 
-  if(voices[i].default) {
-    option.textContent += ' -- DEFAULT';
+    if(voices[i].default) {
+      option.textContent += ' -- DEFAULT';
+    }
+
+    option.setAttribute('data-lang', voices[i].lang);
+    option.setAttribute('data-name', voices[i].name);
+    voiceSelect.appendChild(option);
   }
-
-  option.setAttribute('data-lang', voices[i].lang);
-  option.setAttribute('data-name', voices[i].name);
-  voiceSelect.appendChild(option);
 }
+
+populateVoiceList();
 
 // Fires whenever the img object loads a new image (such as with img.src =)
 img.addEventListener('load', () => {
@@ -94,12 +102,43 @@ reset.addEventListener('click', () => {
 //Occurs when user clicks Read Text button
 readText.addEventListener('click', () => {
 
-  let topSpeech = new SpeechSynthesisUtterance(topText.value);
-  let bottomSpeech = new SpeechSynthesisUtterance(bottomText.value);
+  toSpeak = new SpeechSynthesisUtterance(topText.value + bottomSpeech.value);
 
-  speechSynthesis.speak(topSpeech);
-  speechSynthesis.speak(bottomSpeech);
+  speechSynthesis.speak(toSpeak);
+});
 
+//Occurs when the user changes the volume on the slider
+slider.addEventListener('input', () => {
+
+  if( toSpeak != null ){
+
+    toSpeak.volume = slider.value;
+  }
+
+  // level 0 (0)
+  if( slider.value == 0) {
+
+    icon.src = "icons/volume-level-0.svg"
+    icon.alt = "Volume Level 0"
+  }
+  // level 1 (1-33)
+  else if( slider.value < 34) {
+
+    icon.src = "icons/volume-level-1.svg"
+    icon.alt = "Volume Level 1"
+  }
+  // level 2 (34-66)
+  else if( slider.value < 67 ) {
+
+    icon.src = "icons/volume-level-2.svg"
+    icon.alt = "Volume Level 2"
+  }
+  // level 3 (67-100)
+  else {
+
+    icon.src = "icons/volume-level-3.svg"
+    icon.alt = "Volume Level 3"
+  }
 });
 
 /**
