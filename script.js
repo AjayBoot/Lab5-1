@@ -14,12 +14,21 @@ const bottomText = document.querySelector("[name='textBottom']"); //reference to
 const voiceSelect = document.querySelector("[id='voice-selection']"); 
 var synth = window.speechSynthesis; // initialization of speech synthesizer
 var voices = synth.getVoices();
-var toSpeak;
+var toSpeak = new SpeechSynthesisUtterance();
 const slider = document.querySelector("[type='range']"); // reference to volume slider
 const icon = document.querySelector("div img") // reference to volume icon
 
+//Updates voices array, required for chrome browsers
+synth.addEventListener("voiceschanged", () => {
+  voices = synth.getVoices();
+  populateVoiceList();
+})
+
 //Gets list of voices and updates selection list
 function populateVoiceList() {
+
+  voiceSelect.disabled = false;
+  voiceSelect.remove(0);
 
   for(var i = 0; i < voices.length ; i++) {
     var option = document.createElement('option');
@@ -27,6 +36,7 @@ function populateVoiceList() {
 
     if(voices[i].default) {
       option.textContent += ' -- DEFAULT';
+      toSpeak.voice = voices[i]
     }
 
     option.setAttribute('data-lang', voices[i].lang);
@@ -34,8 +44,6 @@ function populateVoiceList() {
     voiceSelect.appendChild(option);
   }
 }
-
-populateVoiceList();
 
 // Fires whenever the img object loads a new image (such as with img.src =)
 img.addEventListener('load', () => {
@@ -102,7 +110,7 @@ reset.addEventListener('click', () => {
 //Occurs when user clicks Read Text button
 readText.addEventListener('click', () => {
 
-  toSpeak = new SpeechSynthesisUtterance(topText.value + bottomSpeech.value);
+  toSpeak.text = (topText.value + " " + bottomText.value);
 
   speechSynthesis.speak(toSpeak);
 });
@@ -110,10 +118,7 @@ readText.addEventListener('click', () => {
 //Occurs when the user changes the volume on the slider
 slider.addEventListener('input', () => {
 
-  if( toSpeak != null ){
-
-    toSpeak.volume = slider.value;
-  }
+  toSpeak.volume = slider.value/100;
 
   // level 0 (0)
   if( slider.value == 0) {
@@ -138,6 +143,21 @@ slider.addEventListener('input', () => {
 
     icon.src = "icons/volume-level-3.svg"
     icon.alt = "Volume Level 3"
+  }
+});
+
+//occurs when the user changes the selected voice
+voiceSelect.addEventListener('change', () => {
+
+  for( let i = 0; i < voices.length ; i++) {
+
+    //gets the name of the language selected by the user.
+    let selected = voiceSelect.options[voiceSelect.selectedIndex].dataset.name;
+
+    if(voices[i].name == selected) {
+
+      toSpeak.voice = voices[i];
+    }
   }
 });
 
