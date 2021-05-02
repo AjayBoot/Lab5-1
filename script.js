@@ -3,30 +3,76 @@
 const img = new Image(); // used to load image from <input> and draw to canvas
 const canvas = document.getElementById('user-image'); // reference to canvas HTML object
 const ctx = canvas.getContext('2d'); // used to manipulate canvas
-const imageInput = document.querySelector("[id='image-input']");
+const imageInput = document.querySelector("[id='image-input']"); // reference to file input
+var dimensions; //used to draw image
+const form = document.querySelector("[id='generate-meme']"); //reference to form
+const submit = document.querySelector("[type='submit']"); // reference to Generate button
+const reset = document.querySelector("[type='reset']"); // reference to Clear button
+const readText = document.querySelector("[type='button']"); // reference to Read Text button]
+const topText = document.querySelector("[name='textTop']"); // reference to text field for top text
+const bottomText = document.querySelector("[name='textBottom']"); //reference to text field for bottom text
 
 
 // Fires whenever the img object loads a new image (such as with img.src =)
 img.addEventListener('load', () => {
-  // TODO
+ 
+  //reset canvas 
+  ctx.fillStyle = 'black';
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   ctx.fillRect(0,0, canvas.width, canvas.height);
 
-  var dimensions = getDimmensions(canvas.width, canvas.height, img.width, img.height); 
+  //draw image
+  dimensions = getDimmensions(canvas.width, canvas.height, img.width, img.height); 
+  ctx.drawImage(img, dimensions.startX, dimensions.startY, dimensions.width, dimensions.height);
 
-  ctx.drawImage(img, dimensions.StartX, dimensions.StartY, dimensions.height, dimensions.width);
-  
-  // Some helpful tips:
-  // - Fill the whole Canvas with black first to add borders on non-square images, then draw on top
-  // - Clear the form when a new image is selected
-  // - If you draw the image to canvas here, it will update as soon as a new image is selected
+  //toggle buttons
+  submit.disabled = false;
+  reset.disabled = true;
+  readText.disabled = true;
+
 });
 
+// Occurs when user uploads a new image
 imageInput.addEventListener('input', () => {
 
-  img.src = URL.createObjectURL(document.querySelector("[id='image-input']").files[0]);
-  img.alt = imageInput.value.split("\\").pop();
+  img.src = URL.createObjectURL(document.querySelector("[id='image-input']").files[0]); //file source from input
+  img.alt = imageInput.value.split("\\").pop(); //getting filename from path 
+});
+
+// Occurs when user clicks Generate button
+form.addEventListener( 'submit', () => {
+
+  //prevents refreshing on form submission 
+  event.preventDefault();
+
+  // draw text on image
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'white';
+  ctx.strokeStyle = 'black';
+  ctx.font = 'bold 40px serif';
+  ctx.fillText( topText.value.toUpperCase(), canvas.width/2, 30);
+  ctx.fillText( bottomText.value.toUpperCase(), canvas.width/2, canvas.height - 5);
+  ctx.strokeText( topText.value.toUpperCase(), canvas.width/2, 30);
+  ctx.strokeText( bottomText.value.toUpperCase(), canvas.width/2, canvas.height - 5);
+
+
+  //toggle buttons
+  submit.disabled = true;
+  reset.disabled = false;
+  readText.disabled = false;
+});
+
+//Occurs when user clicks Clear button
+reset.addEventListener('click', () => {
+
+    //reset canvas 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.querySelector("[id='image-input']").value = "";
+
+    //toggle buttons
+    submit.disabled = false;
+    reset.disabled = true;
+    readText.disabled = true;
 });
 
 /**
